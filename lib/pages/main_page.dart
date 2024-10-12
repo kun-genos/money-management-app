@@ -3,6 +3,7 @@ import 'package:calendar_appbar/calendar_appbar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:money_management/pages/category_page.dart';
 import 'package:money_management/pages/home_page.dart';
+import 'package:money_management/pages/transaction_page.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -47,7 +48,11 @@ class _MainPageState extends State<MainPage> {
       floatingActionButton: Visibility(
         visible: (currentIndex == 0) ? true : false,
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return TransactionPage();
+            }));
+          },
           backgroundColor: Colors.amber[800],
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
