@@ -9,7 +9,7 @@ class DatabaseHelper {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('categories.db');
+    _database = await _initDB('money_management.db');
     return _database!;
   }
 
@@ -22,11 +22,23 @@ class DatabaseHelper {
 
   Future _createDB(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE categories(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        isExpense INTEGER NOT NULL
-      )
+    CREATE TABLE categories(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      isExpense INTEGER NOT NULL
+    )
+    ''');
+
+    await db.execute('''
+    CREATE TABLE transactions(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      amount REAL NOT NULL,
+      description TEXT,
+      categoryId INTEGER,
+      date TEXT NOT NULL,
+      isExpense INTEGER NOT NULL,
+      FOREIGN KEY (categoryId) REFERENCES categories(id)
+    )
     ''');
   }
 
@@ -49,6 +61,38 @@ class DatabaseHelper {
     final db = await instance.database;
     return await db.delete(
       'categories',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> createTransaction(double amount, String description,
+      int categoryId, DateTime date, bool isExpense) async {
+    final db = await instance.database;
+    final data = {
+      'amount': amount,
+      'description': description,
+      'categoryId': categoryId,
+      'date': date.toIso8601String(),
+      'isExpense': isExpense ? 1 : 0,
+    };
+    return await db.insert('transactions', data);
+  }
+
+  Future<List<Map<String, dynamic>>> getTransactions() async {
+    final db = await instance.database;
+    return await db.rawQuery('''
+    SELECT t.*, c.name as categoryName
+    FROM transactions t
+    LEFT JOIN categories c ON t.categoryId = c.id
+    ORDER BY t.date DESC
+    ''');
+  }
+
+  Future<int> deleteTransaction(int id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'transactions',
       where: 'id = ?',
       whereArgs: [id],
     );

@@ -58,9 +58,9 @@ class _MainPageState extends State<MainPage> {
       body: _page[currentIndex],
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
-        color: Colors.white, // Set background color to white
-        elevation: 8.0, // Add elevation for shadow effect
-        shape: CircularNotchedRectangle(), // Optional: Add a notch for the FAB
+        color: Colors.white,
+        elevation: 8.0,
+        shape: CircularNotchedRectangle(),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -69,10 +69,8 @@ class _MainPageState extends State<MainPage> {
                 onTapped(0);
               },
               icon: Icon(
-                Icons.home_outlined, // Use outlined icon for a modern look
-                color: currentIndex == 0
-                    ? Colors.amber[800]
-                    : Colors.grey, // Highlight selected icon
+                Icons.home_outlined,
+                color: currentIndex == 0 ? Colors.amber[800] : Colors.grey,
               ),
             ),
             SizedBox(
@@ -83,10 +81,8 @@ class _MainPageState extends State<MainPage> {
                 onTapped(1);
               },
               icon: Icon(
-                Icons.category_outlined, // Use outlined icon for a modern look
-                color: currentIndex == 1
-                    ? Colors.amber[800]
-                    : Colors.grey, // Highlight selected icon
+                Icons.category_outlined,
+                color: currentIndex == 1 ? Colors.amber[800] : Colors.grey,
               ),
             ),
           ],

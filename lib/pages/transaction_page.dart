@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:money_management/database/database_helper.dart';
 
 class TransactionPage extends StatefulWidget {
   const TransactionPage({Key? key}) : super(key: key);
@@ -11,25 +12,31 @@ class TransactionPage extends StatefulWidget {
 
 class _TransactionPageState extends State<TransactionPage> {
   bool isExpense = true;
-  String? selectedCategory;
+  int? selectedCategoryId;
   String? description;
-  DateTime? selectedDate;
+  DateTime selectedDate = DateTime.now();
   final TextEditingController _amountController = TextEditingController();
 
-  final List<String> categories = [
-    'Makan dan Jajan',
-    'Transportasi',
-    'Pakaian',
-    'Kesehatan',
-    'Hiburan',
-    'Pendidikan',
-    'Lainnya'
-  ];
+  List<Map<String, dynamic>> categories = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    final loadedCategories =
+        await DatabaseHelper.instance.getCategories(isExpense);
+    setState(() {
+      categories = loadedCategories;
+    });
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate ?? DateTime.now(),
+      initialDate: selectedDate,
       firstDate: DateTime(2024),
       lastDate: DateTime(2025),
       builder: (context, child) {
@@ -57,9 +64,26 @@ class _TransactionPageState extends State<TransactionPage> {
     }
   }
 
-  void _saveTransaction() {
-    // Implement your save logic here
-    print('Transaction saved');
+  void _saveTransaction() async {
+    if (_amountController.text.isEmpty || selectedCategoryId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill in all required fields')),
+      );
+      return;
+    }
+
+    double amount = double.parse(_amountController.text);
+    await DatabaseHelper.instance.createTransaction(
+      amount,
+      description ?? '',
+      selectedCategoryId!,
+      selectedDate,
+      isExpense,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Transaction saved successfully')),
+    );
     Navigator.of(context).pop();
   }
 
@@ -159,22 +183,22 @@ class _TransactionPageState extends State<TransactionPage> {
   }
 
   Widget _buildCategoryDropdown() {
-    return DropdownButtonFormField<String>(
-      value: selectedCategory,
-      hint: Text('Pilih Kategori', style: GoogleFonts.poppins()),
-      items: categories.map((String category) {
-        return DropdownMenuItem<String>(
-          value: category,
-          child: Text(category, style: GoogleFonts.poppins()),
+    return DropdownButtonFormField<int>(
+      value: selectedCategoryId,
+      hint: Text('Choose Category', style: GoogleFonts.poppins()),
+      items: categories.map((category) {
+        return DropdownMenuItem<int>(
+          value: category['id'] as int,
+          child: Text(category['name'], style: GoogleFonts.poppins()),
         );
       }).toList(),
-      onChanged: (String? newValue) {
+      onChanged: (int? newValue) {
         setState(() {
-          selectedCategory = newValue;
+          selectedCategoryId = newValue;
         });
       },
       decoration: InputDecoration(
-        labelText: 'Kategori',
+        labelText: 'Category',
         labelStyle: GoogleFonts.poppins(color: Colors.grey[700]),
         prefixIcon: Icon(Icons.category, color: Colors.amber[800]),
         border: OutlineInputBorder(
