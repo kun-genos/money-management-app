@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:money_management/database/database_helper.dart';
 import 'package:money_management/pages/category_page.dart';
 import 'package:money_management/pages/home_page.dart';
 import '../pages/main_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DatabaseHelper.instance.database;
   runApp(MyApp());
 }
 

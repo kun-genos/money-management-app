@@ -37,12 +37,8 @@ class _MainPageState extends State<MainPage> {
               preferredSize: Size.fromHeight(100),
               child: Container(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 42, horizontal: 16),
-                  child: Text(
-                    "Kategori",
-                    style: GoogleFonts.montserrat(fontSize: 20),
-                  ),
-                ),
+                    padding:
+                        EdgeInsets.symmetric(vertical: 42, horizontal: 16)),
               ),
             ),
       floatingActionButton: Visibility(
@@ -62,22 +58,37 @@ class _MainPageState extends State<MainPage> {
       body: _page[currentIndex],
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
+        color: Colors.white, // Set background color to white
+        elevation: 8.0, // Add elevation for shadow effect
+        shape: CircularNotchedRectangle(), // Optional: Add a notch for the FAB
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             IconButton(
-                onPressed: () {
-                  onTapped(0);
-                },
-                icon: Icon(Icons.home)),
+              onPressed: () {
+                onTapped(0);
+              },
+              icon: Icon(
+                Icons.home_outlined, // Use outlined icon for a modern look
+                color: currentIndex == 0
+                    ? Colors.amber[800]
+                    : Colors.grey, // Highlight selected icon
+              ),
+            ),
             SizedBox(
               width: 100,
             ),
             IconButton(
-                onPressed: () {
-                  onTapped(1);
-                },
-                icon: Icon(Icons.list_alt)),
+              onPressed: () {
+                onTapped(1);
+              },
+              icon: Icon(
+                Icons.category_outlined, // Use outlined icon for a modern look
+                color: currentIndex == 1
+                    ? Colors.amber[800]
+                    : Colors.grey, // Highlight selected icon
+              ),
+            ),
           ],
         ),
       ),

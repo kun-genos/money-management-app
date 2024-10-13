@@ -35,6 +35,8 @@ dependencies:
   google_fonts: ^6.2.1
   calendar_appbar: ^0.0.6
   cx_calendar_appbar: ^0.0.14
+  sqflite: ^2.0.0+3
+  path: ^1.8.0
 
 dev_dependencies:
   flutter_test:
