@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:money_management/database/database_helper.dart';
 import 'package:money_management/pages/category_page.dart';
 import 'package:money_management/pages/home_page.dart';
-import 'package:money_management/pages/main_page.dart';
+import 'package:money_management/pages/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainPage(),
+      home: SplashScreen(),
       theme: ThemeData(primarySwatch: Colors.amber),
       routes: {
         HomePage.routeName: (ctx) => HomePage(key: UniqueKey()),

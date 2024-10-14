@@ -42,7 +42,7 @@ class _TransactionPageState extends State<TransactionPage> {
       context: context,
       initialDate: selectedDate,
       firstDate: DateTime(2024),
-      lastDate: DateTime(2025),
+      lastDate: DateTime(2030),
       builder: (context, child) {
         return Theme(
           data: ThemeData.light().copyWith(
