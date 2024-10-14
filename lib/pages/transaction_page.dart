@@ -178,7 +178,7 @@ class _TransactionPageState extends State<TransactionPage> {
             onChanged: (value) {
               setState(() {
                 isExpense = value;
-                _loadCategories(); // Reload categories when switching
+                _loadCategories();
               });
             },
             activeColor: Colors.red,
