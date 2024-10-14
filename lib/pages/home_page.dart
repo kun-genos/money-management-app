@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:money_management/database/database_helper.dart';
+import 'package:calendar_appbar/calendar_appbar.dart';
+import 'package:money_management/pages/transaction_page.dart';
 
 class HomePage extends StatefulWidget {
+  final VoidCallback? refreshCallback;
+
+  const HomePage({Key? key, this.refreshCallback}) : super(key: key);
+
   @override
   State<HomePage> createState() => _HomePageState();
 
@@ -13,9 +22,89 @@ class _HomePageState extends State<HomePage> {
   final currencyFormatter =
       NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
+  double balance = 0;
+  double monthlyIncome = 0;
+  double monthlyExpense = 0;
+  List<Map<String, dynamic>> transactions = [];
+  DateTime selectedDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await _calculateBalance();
+    await _calculateMonthlyIncomeAndExpense();
+    await _loadTransactions();
+  }
+
+  Future<void> _calculateBalance() async {
+    final allTransactions = await DatabaseHelper.instance.getTransactions();
+    double totalBalance = 0;
+    for (var transaction in allTransactions) {
+      if (transaction['isExpense'] == 0) {
+        totalBalance += transaction['amount'];
+      } else {
+        totalBalance -= transaction['amount'];
+      }
+    }
+    setState(() {
+      balance = totalBalance;
+    });
+  }
+
+  Future<void> _calculateMonthlyIncomeAndExpense() async {
+    final allTransactions = await DatabaseHelper.instance.getTransactions();
+    double income = 0;
+    double expense = 0;
+    final now = DateTime.now();
+    for (var transaction in allTransactions) {
+      final transactionDate = DateTime.parse(transaction['date']);
+      if (transactionDate.year == now.year &&
+          transactionDate.month == now.month) {
+        if (transaction['isExpense'] == 0) {
+          income += transaction['amount'];
+        } else {
+          expense += transaction['amount'];
+        }
+      }
+    }
+    setState(() {
+      monthlyIncome = income;
+      monthlyExpense = expense;
+    });
+  }
+
+  Future<void> _loadTransactions() async {
+    final allTransactions = await DatabaseHelper.instance.getTransactions();
+    setState(() {
+      transactions = allTransactions.where((transaction) {
+        final transactionDate = DateTime.parse(transaction['date']);
+        return transactionDate.year == selectedDate.year &&
+            transactionDate.month == selectedDate.month &&
+            transactionDate.day == selectedDate.day;
+      }).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: CalendarAppBar(
+        backButton: false,
+        accent: Colors.amber[800],
+        locale: 'id',
+        onDateChanged: (value) {
+          setState(() {
+            selectedDate = value;
+          });
+          _loadTransactions();
+        },
+        firstDate: DateTime.now().subtract(Duration(days: 140)),
+        lastDate: DateTime.now(),
+      ),
       body: SingleChildScrollView(
         child: SafeArea(
           child: Padding(
@@ -67,7 +156,7 @@ class _HomePageState extends State<HomePage> {
           ),
           SizedBox(height: 10),
           Text(
-            currencyFormatter.format(1000000),
+            currencyFormatter.format(balance),
             style: GoogleFonts.poppins(
               color: Colors.white,
               fontSize: 28,
@@ -78,10 +167,10 @@ class _HomePageState extends State<HomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildBalanceItem(
-                  Icons.arrow_downward, Colors.green, 'Pemasukan', 2400000),
-              _buildBalanceItem(
-                  Icons.arrow_upward, Colors.red, 'Pengeluaran', 1400000),
+              _buildBalanceItem(Icons.arrow_downward, Colors.green, 'Pemasukan',
+                  monthlyIncome),
+              _buildBalanceItem(Icons.arrow_upward, Colors.red, 'Pengeluaran',
+                  monthlyExpense),
             ],
           ),
         ],
@@ -139,14 +228,24 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         SizedBox(height: 15),
-        _buildTransactionItem('Beli Buku', 20000, true),
-        _buildTransactionItem('Pemasukan Toko', 30000000, false),
+        transactions.isEmpty
+            ? Center(child: Text('Tidak ada transaksi pada tanggal ini'))
+            : Column(
+                children: transactions
+                    .map((transaction) => _buildTransactionItem(
+                          transaction['description'],
+                          transaction['amount'],
+                          transaction['isExpense'] == 1,
+                          transaction['categoryName'],
+                        ))
+                    .toList(),
+              ),
       ],
     );
   }
 
   Widget _buildTransactionItem(
-      String description, double amount, bool isExpense) {
+      String description, double amount, bool isExpense, String category) {
     return Card(
       elevation: 2,
       margin: EdgeInsets.only(bottom: 12),
@@ -171,22 +270,21 @@ class _HomePageState extends State<HomePage> {
             color: isExpense ? Colors.red : Colors.green,
           ),
         ),
-        subtitle: Text(
-          description,
-          style: GoogleFonts.poppins(
-            color: Colors.grey[600],
-          ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            IconButton(
-              icon: Icon(Icons.edit, color: Colors.blue),
-              onPressed: () {},
+            Text(
+              description,
+              style: GoogleFonts.poppins(
+                color: Colors.grey[600],
+              ),
             ),
-            IconButton(
-              icon: Icon(Icons.delete, color: Colors.red),
-              onPressed: () {},
+            Text(
+              category,
+              style: GoogleFonts.poppins(
+                color: Colors.grey[400],
+                fontSize: 12,
+              ),
             ),
           ],
         ),

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:calendar_appbar/calendar_appbar.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:money_management/pages/category_page.dart';
 import 'package:money_management/pages/home_page.dart';
 import 'package:money_management/pages/transaction_page.dart';
@@ -11,9 +9,27 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  List<Widget> _page = [HomePage(), CategoryPage()];
-
+  late List<Widget> _pages;
   int currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePages();
+  }
+
+  void _initializePages() {
+    _pages = [
+      HomePage(key: UniqueKey()),
+      CategoryPage(),
+    ];
+  }
+
+  void refreshHomePage() {
+    setState(() {
+      _initializePages();
+    });
+  }
 
   void onTapped(index) {
     setState(() {
@@ -24,30 +40,18 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: (currentIndex == 0)
-          ? CalendarAppBar(
-              backButton: false,
-              accent: Colors.amber[800],
-              locale: 'id',
-              onDateChanged: (value) => print(value),
-              firstDate: DateTime.now().subtract(Duration(days: 140)),
-              lastDate: DateTime.now(),
-            )
-          : PreferredSize(
-              preferredSize: Size.fromHeight(100),
-              child: Container(
-                child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 42, horizontal: 16)),
-              ),
-            ),
+      body: _pages[currentIndex],
       floatingActionButton: Visibility(
-        visible: (currentIndex == 0) ? true : false,
+        visible: (currentIndex == 0),
         child: FloatingActionButton(
           onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return TransactionPage();
-            }));
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => TransactionPage(
+                  refreshHomeCallback: refreshHomePage,
+                ),
+              ),
+            );
           },
           backgroundColor: Colors.amber[800],
           shape:
@@ -55,7 +59,6 @@ class _MainPageState extends State<MainPage> {
           child: Icon(Icons.add),
         ),
       ),
-      body: _page[currentIndex],
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
@@ -73,9 +76,7 @@ class _MainPageState extends State<MainPage> {
                 color: currentIndex == 0 ? Colors.amber[800] : Colors.grey,
               ),
             ),
-            SizedBox(
-              width: 100,
-            ),
+            SizedBox(width: 100),
             IconButton(
               onPressed: () {
                 onTapped(1);

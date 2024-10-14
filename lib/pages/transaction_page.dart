@@ -4,7 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:money_management/database/database_helper.dart';
 
 class TransactionPage extends StatefulWidget {
-  const TransactionPage({Key? key}) : super(key: key);
+  final VoidCallback refreshHomeCallback;
+
+  const TransactionPage({Key? key, required this.refreshHomeCallback})
+      : super(key: key);
 
   @override
   State<TransactionPage> createState() => _TransactionPageState();
@@ -30,6 +33,7 @@ class _TransactionPageState extends State<TransactionPage> {
         await DatabaseHelper.instance.getCategories(isExpense);
     setState(() {
       categories = loadedCategories;
+      selectedCategoryId = null;
     });
   }
 
@@ -66,9 +70,7 @@ class _TransactionPageState extends State<TransactionPage> {
 
   void _saveTransaction() async {
     if (_amountController.text.isEmpty || selectedCategoryId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill in all required fields')),
-      );
+      _showNotification('Please fill in all required fields', isError: true);
       return;
     }
 
@@ -81,10 +83,42 @@ class _TransactionPageState extends State<TransactionPage> {
       isExpense,
     );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Transaction saved successfully')),
-    );
+    _showNotification('Transaction saved successfully');
+
+    widget.refreshHomeCallback();
+
     Navigator.of(context).pop();
+  }
+
+  void _showNotification(String message, {bool isError = false}) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).padding.top + 10,
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: isError ? Colors.red : Colors.green,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              message,
+              style: GoogleFonts.poppins(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: 2), () {
+      overlayEntry.remove();
+    });
   }
 
   @override
@@ -144,6 +178,7 @@ class _TransactionPageState extends State<TransactionPage> {
             onChanged: (value) {
               setState(() {
                 isExpense = value;
+                _loadCategories(); // Reload categories when switching
               });
             },
             activeColor: Colors.red,
