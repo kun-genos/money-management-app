@@ -15,11 +15,12 @@ Monman is a personal money management application built to help you track, recor
 
 ## Screens
 
-- **Dashboard**: A summary screen showing key financial stats, such as total balance, recent transactions, and spending trends.
-- **Transaction Screen**: Allows users to view, add, edit, and delete their transactions with ease.
-- **Budget Screen**: Manage and monitor your set budgets for various categories, keeping you on track with your financial goals.
-- **Reports Screen**: Visual representation of your financial data through pie charts and bar graphs for clearer insights.
-- **Settings Screen**: Customize the app to your preferences, including currency selection and theme customization.
+- **Dashboard Screen**: A central hub that provides an overview of your financial status, including total balance, recent transactions, and financial trends.
+- **Category Screen**: Organize your transactions by categories such as Food, Transport, and Entertainment. This helps you get a detailed breakdown of your expenses across different categories.
+- **Add Transaction Screen**: Quickly add new transactions with ease. Input the amount, choose a category, and specify whether it's an income or expense.
+- **History Screen**: View a complete log of all your past transactions in chronological order, with filters to search by date, category, or amount.
+- **Calendar Screen**: Visualize your spending habits over time using a calendar view. Built with the **calendar_appbar** package, this screen allows users to browse through dates and track daily transactions easily.
+
 
 ## Getting Started
 
